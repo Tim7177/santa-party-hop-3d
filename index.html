@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>圣诞派对 · 奇幻跳一跳 | Santa's Party Hop 3D</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script type="module" crossorigin src="./assets/index-DBYddzvH.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CTM3urva.css">
+  </head>
+  <body>
+    <div id="app">
+      <!-- 3D 游戏渲染容器 -->
+      <div id="canvas-container"></div>
+
+      <!-- 飘字特效层 (分数 / PERFECT / 彩蛋提示) -->
+      <div id="floating-layer"></div>
+
+      <!-- 顶部彩蛋发现横幅 -->
+      <div id="toast-container"></div>
+
+      <!-- 游戏中 HUD -->
+      <div id="hud" class="hidden">
+        <div class="hud-left">
+          <div class="score-card">
+            <div class="score-label">得分</div>
+            <div id="score-value" class="score-value">0</div>
+            <div class="best-row">
+              <span>🏆 最高</span>
+              <span id="hud-best">0</span>
+            </div>
+          </div>
+          <div id="combo-badge" class="combo-badge hidden">
+            <span class="combo-fire">✨</span>
+            <span id="combo-text">PERFECT ×2</span>
+          </div>
+          <div id="buff-list" class="buff-list"></div>
+        </div>
+
+        <div class="hud-right">
+          <button id="btn-eggs" class="icon-btn egg-btn" title="圣诞彩蛋图鉴">
+            <span>🎁</span>
+            <span id="egg-progress" class="egg-count">0/6</span>
+          </button>
+          <button id="btn-guide" class="icon-btn" title="星尘落点指引（练习模式）">
+            <span id="guide-icon">✨</span>
+          </button>
+          <button id="btn-bgm" class="icon-btn active" title="圣诞八音盒音乐">
+            <span id="bgm-icon">🎶</span>
+          </button>
+          <button id="btn-sfx" class="icon-btn active" title="音效开关">
+            <span id="sfx-icon">🔔</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 彩蛋停留进度提示环 -->
+      <div id="stay-hint" class="stay-hint hidden">
+        <div class="stay-ring-wrap">
+          <svg class="stay-svg" viewBox="0 0 44 44">
+            <circle class="stay-bg" cx="22" cy="22" r="18" />
+            <circle id="stay-circle" class="stay-fg" cx="22" cy="22" r="18" />
+          </svg>
+          <span id="stay-emoji" class="stay-emoji">🎁</span>
+        </div>
+        <span id="stay-label" class="stay-label">原地停留解锁惊喜...</span>
+      </div>
+
+      <!-- 蓄力进度微光条 + 首次指引 -->
+      <div id="bottom-hud" class="bottom-hud hidden">
+        <div id="tutorial-hint" class="tutorial-hint">
+          <span>❄️ 长按屏幕或 <kbd>空格键</kbd> 蓄力，松开跳跃 · 特殊平台停留有彩蛋哦！</span>
+        </div>
+        <div id="power-bar-wrap" class="power-bar-wrap">
+          <div id="power-bar-fill" class="power-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- 主界面覆盖层 -->
+      <div id="start-screen" class="overlay-screen">
+        <div class="christmas-card start-card">
+          <div class="card-ribbon">🎄 3D 圣诞派对奇幻夜 🎄</div>
+          <h1 class="game-title">圣诞跳一跳</h1>
+          <p class="game-subtitle">Santa's Party Hop · 蓄力跃过冬日雪夜与秘密彩蛋</p>
+
+          <div class="skin-section">
+            <div class="section-title">选择派对主角</div>
+            <div class="skin-grid" id="skin-selector">
+              <button class="skin-item active" data-skin="santa">
+                <span class="skin-emoji">🎅</span>
+                <span class="skin-name">圣诞小老人</span>
+              </button>
+              <button class="skin-item" data-skin="snowman">
+                <span class="skin-emoji">⛄</span>
+                <span class="skin-name">围巾小雪人</span>
+              </button>
+              <button class="skin-item" data-skin="reindeer">
+                <span class="skin-emoji">🦌</span>
+                <span class="skin-name">红鼻鲁道夫</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="start-actions">
+            <button id="btn-start" class="primary-btn">
+              <span>✨ 开始圣诞派对</span>
+            </button>
+            <button id="btn-open-eggs" class="secondary-btn">
+              <span>🎁 彩蛋图鉴 (<span id="start-egg-count">0/6</span>)</span>
+            </button>
+          </div>
+
+          <div class="start-tips">
+            <span>🖱️ 长按鼠标 / 触屏 / 空格蓄力</span>
+            <span>·</span>
+            <span>🎵 连续中心落点奏响 Jingle Bells</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 游戏结束结算贺卡 -->
+      <div id="gameover-screen" class="overlay-screen hidden">
+        <div class="christmas-card gameover-card">
+          <div class="card-ribbon">❄️ 派对夜小憩 ❄️</div>
+          <div id="rank-badge" class="rank-badge">🎄 圣诞派对新人</div>
+
+          <div class="final-score-box">
+            <div class="final-score-label">本局得分</div>
+            <div id="final-score" class="final-score">0</div>
+            <div id="new-record-tag" class="new-record-tag hidden">🎉 刷新最高纪录！</div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-pill">
+              <span class="stat-k">🏆 历史最高</span>
+              <span id="final-best" class="stat-v">0</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-k">🔥 最高连击</span>
+              <span id="final-combo" class="stat-v">0</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-k">👣 跳跃步数</span>
+              <span id="final-jumps" class="stat-v">0</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-k">🎁 已解锁彩蛋</span>
+              <span id="final-eggs" class="stat-v">0/6</span>
+            </div>
+          </div>
+
+          <div id="assist-note" class="assist-note hidden">✨ 本局启用了星尘落点指引</div>
+
+          <div class="gameover-actions">
+            <button id="btn-restart" class="primary-btn">
+              <span>🎄 再跳一局</span>
+            </button>
+            <div class="sub-actions">
+              <button id="btn-home" class="secondary-btn">🎅 切换主角</button>
+              <button id="btn-go-eggs" class="secondary-btn">🎁 彩蛋图鉴</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 彩蛋图鉴弹窗 -->
+      <div id="egg-modal" class="overlay-screen hidden modal-backdrop">
+        <div class="christmas-card egg-modal-card">
+          <div class="modal-header">
+            <div>
+              <h2>🎁 圣诞派对彩蛋图鉴</h2>
+              <p class="modal-desc">在特殊的圣诞平台上停留或达成奇迹，收集全部 6 个派对彩蛋！</p>
+            </div>
+            <button id="btn-close-eggs" class="close-btn" aria-label="关闭">✕</button>
+          </div>
+          <div id="egg-grid" class="egg-grid"></div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
